@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# This script packages, tests locally, deploy and tests remotely a simple Python Lambda function.
+#   The arguments must be the <bucket name> and the new <stack name>
+
+# Read the arguments
+bucket=$1
+stack=$2
+
+# Build
+# ---------------------------------------------
+if [ -d .aws-sam ] ; then
+    rm -fr .aws-sam
+fi 
+sam package --template-file template.yml --output-template-file sam-template.yml --s3-bucket $bucket
+if [ $? -eq 0 ]; then
+  echo "Build failed.""
+  exit 1
+fi
+if [ -d .aws-sam ] ; then
+    echo ".aws-sam created successfully"
+else
+    echo "Build failed!!! .aws-sam not created.
+    exit 1
+fi 
+
+
+
+
+
+# Package
+# ---------------------------------------------
+if [ -f sam-template.yml ] ; then
+    rm -f sam-template.yml
+fi 
+sam package --template-file template.yml --output-template-file sam-template.yml --s3-bucket $bucket
+if [ $? -eq 0 ]; then
+  echo "Packaging failed.""
+  exit 1
+fi
+if [ -f sam-template.yml ] ; then
+    echo "sam-template.yml created successfully"
+else
+    echo "Packaging failed!!! sam-template.yml not created.
+    exit 1
+fi 
+
+# Test Locally
+# ---------------------------------------------
+if [ $? -eq 0 ]; then
+  echo "Packaging failed.""
+fi
+
+
+# Deploy
+# ---------------------------------------------
+sam deploy --template-file /home/ec2-user/environment/aws-sam-test/sam-template.yml --stack-name $stack
+if [ $? -eq 0 ]; then
+  echo "Deploy failed.""
+  exit 3
+fi
+
