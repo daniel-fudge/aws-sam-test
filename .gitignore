@@ -132,3 +132,7 @@ dmypy.json
 sam-template.yml
 .aws-sam
 .idea
+
+# Custom
+response.json
+commands.bsh
