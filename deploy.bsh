@@ -7,56 +7,57 @@
 bucket=$1
 stack=$2
 
+cd package
+
 # Build
 # ---------------------------------------------
 if [ -d .aws-sam ] ; then
-    rm -fr .aws-sam
+  rm -fr .aws-sam
 fi 
-sam package --template-file template.yml --output-template-file sam-template.yml --s3-bucket $bucket
-if [ $? -eq 0 ]; then
-  echo "Build failed.""
+if sam build ; then
+  echo "Build finished without errors."
+else
+  echo "Build finished with errors."
   exit 1
 fi
+
 if [ -d .aws-sam ] ; then
     echo ".aws-sam created successfully"
 else
-    echo "Build failed!!! .aws-sam not created.
-    exit 1
+    echo "Build failed!!! .aws-sam not created."
+    exit 2
 fi 
-
-
-
-
-
-# Package
-# ---------------------------------------------
-if [ -f sam-template.yml ] ; then
-    rm -f sam-template.yml
-fi 
-sam package --template-file template.yml --output-template-file sam-template.yml --s3-bucket $bucket
-if [ $? -eq 0 ]; then
-  echo "Packaging failed.""
-  exit 1
-fi
-if [ -f sam-template.yml ] ; then
-    echo "sam-template.yml created successfully"
-else
-    echo "Packaging failed!!! sam-template.yml not created.
-    exit 1
-fi 
-
-# Test Locally
-# ---------------------------------------------
-if [ $? -eq 0 ]; then
-  echo "Packaging failed.""
-fi
-
 
 # Deploy
 # ---------------------------------------------
-sam deploy --template-file /home/ec2-user/environment/aws-sam-test/sam-template.yml --stack-name $stack
-if [ $? -eq 0 ]; then
-  echo "Deploy failed.""
+if sam deploy --stack-name $stack --s3-bucket $bucket --capabilities CAPABILITY_IAM ; then
+  echo "Deploy finished without errors."
+else
+  echo "Deploy failed."
   exit 3
 fi
+rm -fr .aws-sam
 
+# Test
+# ---------------------------------------------
+cd ..
+if [ -f response.json ] ; then
+    rm -f response.json
+fi 
+if aws lambda invoke \
+  --function-name demo-sam-lambda \
+  --payload '{"first_name": "Dangerous", "last_name": "Dan"}' \
+  --cli-binary-format raw-in-base64-out \
+  response.json ; then
+  echo "Test finished without errors."
+else
+  echo "Test failed."
+  exit 4
+fi
+
+if grep -q '{"message": "Hello Dangerous Dan!"' response.json ; then
+  echo "Test successful."
+else
+  echo "Test Failed, response.json looks funky."
+  exit 5
+fi

@@ -12,13 +12,13 @@ In the following commands replace `<bucket>` with your S3 bucket name and a uniq
 You also need a Lambda role as created in [this](https://github.com/daniel-fudge/aws-s3-trigger) repo 
 and update the `template.yml` file with this arn.
 
-## Automated Build, Local Test, Deploy & Remote Test
-Executing the following command will build, locally test, deploy and remotely test the lambda function.  
+## Automated Build, Deploy & Remote Test
+Executing the following command will build, deploy and remotely test the lambda function.  
 ```shell
 bash deploy.bsh <bucket> <stack-name>
 ```
+If successful you should see `Test successful` at end of script output
 Please read the [deploy.bsh](deploy.bsh) file to see all of the individual commands.
-
 
 ## Manual Build, Deploy & Test
 Note that all of these operations occur in the `package` folder so only these contents are deployed to AWS.
