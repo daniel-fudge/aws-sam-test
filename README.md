@@ -52,7 +52,7 @@ This command deploys the CloudFormation template in `.aws-sam`, which creates th
 sam deploy --stack-name <stack-name> --s3-bucket <bucket> --capabilities CAPABILITY_IAM
 ```
 
-## Test deployed function
+### Test deployed function
 ```shell
 rm response.json
 aws lambda invoke \
